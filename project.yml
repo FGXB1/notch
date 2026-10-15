@@ -1,0 +1,86 @@
+name: Notch
+options:
+  bundleIdPrefix: dev.ishan
+  deploymentTarget:
+    macOS: "26.0"
+  createIntermediateGroups: true
+configFiles:
+  Debug: Config/Signing.xcconfig
+  Release: Config/Signing.xcconfig
+settings:
+  base:
+    SWIFT_VERSION: "6.0"
+    SWIFT_STRICT_CONCURRENCY: complete
+    # Set by Scripts/release.sh. Builds without them don't update themselves (see App/Updater.swift).
+    NOTCH_APPCAST_URL: ""
+    NOTCH_SPARKLE_KEY: ""
+packages:
+  NotchKit:
+    path: Packages/NotchKit
+  Sparkle:
+    url: https://github.com/sparkle-project/Sparkle
+    from: "2.7.0"
+targets:
+  Notch:
+    type: application
+    platform: macOS
+    sources:
+      - path: App
+    info:
+      path: Config/Info.plist
+      properties:
+        CFBundleDisplayName: Notch
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        LSApplicationCategoryType: public.app-category.productivity
+        LSUIElement: true
+        NSAppleEventsUsageDescription: Notch controls and displays the music you're playing.
+        NSCalendarsFullAccessUsageDescription: Notch shows your upcoming events.
+        NSAudioCaptureUsageDescription: Notch visualizes the audio that's playing as a live waveform.
+        NSBluetoothAlwaysUsageDescription: Notch shows your connected audio devices.
+        NSLocationWhenInUseUsageDescription: Notch uses your location for weather and travel times.
+        NSLocationUsageDescription: Notch uses your location for weather and travel times.
+        SUFeedURL: $(NOTCH_APPCAST_URL)
+        SUPublicEDKey: $(NOTCH_SPARKLE_KEY)
+        SUEnableAutomaticChecks: true
+    entitlements:
+      path: Config/Notch.entitlements
+      properties:
+        com.apple.security.app-sandbox: false
+        com.apple.security.automation.apple-events: true
+        # Hardened runtime blocks these TCC services unless the entitlement is present.
+        com.apple.security.personal-information.calendars: true
+        com.apple.security.personal-information.location: true
+    postCompileScripts:
+      - name: Embed mediaremote-adapter
+        script: '"$SRCROOT/Scripts/build-adapter.sh" "$TARGET_BUILD_DIR/$UNLOCALIZED_RESOURCES_FOLDER_PATH/MediaRemoteAdapter"'
+        basedOnDependencyAnalysis: false
+    dependencies:
+      - package: NotchKit
+        product: NotchCore
+      - package: NotchKit
+        product: MediaKit
+      - package: NotchKit
+        product: CalendarKit
+      - package: NotchKit
+        product: SystemKit
+      - package: NotchKit
+        product: AudioTap
+      - package: NotchKit
+        product: WeatherLite
+      - package: NotchKit
+        product: FileTray
+      - package: NotchKit
+        product: NotchUI
+      - package: NotchKit
+        product: NotchShell
+      - package: Sparkle
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: dev.ishan.Notch
+        PRODUCT_NAME: Notch
+        ENABLE_HARDENED_RUNTIME: YES
+        GENERATE_INFOPLIST_FILE: NO
+        # The adapter build phase writes into the bundle and runs cmake from the repo.
+        ENABLE_USER_SCRIPT_SANDBOXING: NO
+    scheme: {}

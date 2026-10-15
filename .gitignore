@@ -1,0 +1,9 @@
+.DS_Store
+build/
+DerivedData/
+*.xcodeproj/
+Spikes/build/
+Vendor/mediaremote-adapter/build/
+Packages/NotchKit/.build/
+Packages/NotchKit/.swiftpm/
+Config/Local.xcconfig

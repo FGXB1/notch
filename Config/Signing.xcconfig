@@ -1,0 +1,11 @@
+#include "Version.xcconfig"
+
+// Signed ad hoc by default, so anyone can build. Ad-hoc signatures change every build, though, and macOS
+// then forgets the privacy permissions it granted (Calendar, Location, Accessibility...). To keep them,
+// sign with your own Apple Development certificate: copy Local.xcconfig.example to Local.xcconfig (which
+// isn't checked in) and fill in your team.
+CODE_SIGN_STYLE = Manual
+CODE_SIGN_IDENTITY = -
+DEVELOPMENT_TEAM =
+
+#include? "Local.xcconfig"
