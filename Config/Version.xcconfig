@@ -1,4 +1,4 @@
 // The version Notch reports. Scripts/release.sh sets both: MARKETING_VERSION to the release's version and
 // CURRENT_PROJECT_VERSION to the next build number, which must only ever go up (Sparkle compares it).
 MARKETING_VERSION = 0.1.0
-CURRENT_PROJECT_VERSION = 3
+CURRENT_PROJECT_VERSION = 4

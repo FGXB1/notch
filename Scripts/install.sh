@@ -26,7 +26,9 @@ trap 'hdiutil detach "$work/volume" -quiet 2> /dev/null || true; rm -rf "$work"'
 
 say "Downloading ${dmg_url##*/}..."
 curl -fL --progress-bar -o "$work/Notch.dmg" "$dmg_url"
-hdiutil attach "$work/Notch.dmg" -nobrowse -readonly -mountpoint "$work/volume" -quiet
+# macOS 27's hdiutil warns that it's deprecated, but still works on every version Notch supports.
+hdiutil attach "$work/Notch.dmg" -nobrowse -readonly -mountpoint "$work/volume" -quiet 2> /dev/null \
+  || fail "couldn't open the downloaded disk image; try again"
 app="$work/volume/Notch.app"
 codesign --verify --deep --strict "$app" 2> /dev/null || fail "the downloaded copy of Notch isn't intact; try again"
 
