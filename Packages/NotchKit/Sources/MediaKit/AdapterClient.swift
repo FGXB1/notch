@@ -8,6 +8,9 @@ final class AdapterClient {
     struct Paths: Sendable {
         var script: URL
         var framework: URL
+        /// Plays a silent dummy track for `test` when nothing else is playing; without it the test can only
+        /// pass while something is.
+        var testClient: URL
 
         /// Copied into `Contents/Resources/MediaRemoteAdapter` by `Scripts/build-adapter.sh`.
         static var bundled: Paths? {
@@ -15,7 +18,8 @@ final class AdapterClient {
                 return nil
             }
             let paths = Paths(script: directory.appendingPathComponent("mediaremote-adapter.pl"),
-                              framework: directory.appendingPathComponent("MediaRemoteAdapter.framework"))
+                              framework: directory.appendingPathComponent("MediaRemoteAdapter.framework"),
+                              testClient: directory.appendingPathComponent("MediaRemoteAdapterTestClient"))
             return FileManager.default.fileExists(atPath: paths.script.path) ? paths : nil
         }
     }
@@ -40,8 +44,9 @@ final class AdapterClient {
     }
 
     /// The adapter's own self-test: exit status 0 means MediaRemote is readable on this macOS version.
-    static func isFunctional(_ paths: Paths) async -> Bool {
-        await run(paths, ["test"]) == 0
+    /// The script takes the test client's path as the argument after the framework's.
+    static func selfTest(_ paths: Paths) async -> Int32 {
+        await run(paths, [paths.testClient.path, "test"])
     }
 
     func start() {

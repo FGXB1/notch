@@ -82,7 +82,7 @@ public final class MediaController {
         }
         guard adapter == nil, playerApps == nil else { return }
         source = .starting
-        if let paths = AdapterClient.Paths.bundled, await AdapterClient.isFunctional(paths) {
+        if let paths = AdapterClient.Paths.bundled, await Self.adapterWorks(paths) {
             let adapter = AdapterClient(paths: paths) { [weak self] message in self?.receive(message) }
             adapter.start()
             self.adapter = adapter
@@ -94,6 +94,18 @@ public final class MediaController {
             self.playerApps = playerApps
             source = .playerApps
         }
+    }
+
+    /// Runs the adapter's self-test, once more after a pause if it fails: the first run after an install can
+    /// be slow while macOS checks the new code, and the fallback has no artwork and fewer players.
+    private static func adapterWorks(_ paths: AdapterClient.Paths) async -> Bool {
+        for attempt in 1...2 {
+            let status = await AdapterClient.selfTest(paths)
+            if status == 0 { return true }
+            Log.media.error("mediaremote-adapter self-test failed (attempt \(attempt), status \(status))")
+            if attempt == 1 { try? await Task.sleep(for: .seconds(3)) }
+        }
+        return false
     }
 
     // MARK: Commands

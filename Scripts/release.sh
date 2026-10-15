@@ -131,6 +131,7 @@ cmd_build() {
   sign "$sparkle/Updater.app"
   sign "$app/Contents/Frameworks/Sparkle.framework"
   sign "$app/Contents/Resources/MediaRemoteAdapter/MediaRemoteAdapter.framework"
+  sign "$app/Contents/Resources/MediaRemoteAdapter/MediaRemoteAdapterTestClient"
   sign --entitlements Config/Notch.entitlements "$app"
   codesign --verify --deep --strict "$app" || die "the signature doesn't verify"
   for arch in arm64 x86_64; do
